@@ -14,40 +14,58 @@ func (s *sequentialLoop[T]) forEach(values []T, f func(T)) {
 	}
 }
 
-type streamData[T any] struct {
+type streamCtx[T any] struct {
 	data        []T
 	defaultLoop iterLoop[T]
 }
 
-func (s *streamData[T]) setData(data []T) *streamData[T] {
+func (s *streamCtx[T]) setData(data []T) *streamCtx[T] {
 	s.data = data
 	return s
 }
 
-func (s *streamData[T]) setLoop(loop iterLoop[T]) *streamData[T] {
+func (s *streamCtx[T]) setLoop(loop iterLoop[T]) *streamCtx[T] {
 	s.defaultLoop = loop
 	return s
 }
 
 type Stream[T any] struct {
-	sd streamData[T]
+	*streamCtx[T]
 }
 
-func (s *Stream[T]) setStreamData(data *streamData[T]) {
-	s.sd = *data
+func (s *Stream[T]) ForEach(f func(T)) {
+	s.defaultLoop.forEach(s.data, func(val T) {
+		f(val)
+	})
+}
+
+func (s *Stream[T]) forEachSeqly(f func(T)) {
+	new(sequentialLoop[T]).forEach(s.data, func(val T) {
+		f(val)
+	})
+}
+
+func (s *Stream[T]) filter(f func(T) bool) *Stream[T] {
+	nl := make([]T, 0)
+	s.forEachSeqly(func(t T) {
+		if f(t) {
+			nl = append(nl, t)
+		}
+	})
+	return &Stream[T]{s.setData(nl)}
 }
 
 func NewStream[T any](list []T) *Stream[T] {
-	sd := streamData[T]{list, &sequentialLoop[T]{}}
-	return &Stream[T]{sd}
+	sd := streamCtx[T]{list, &sequentialLoop[T]{}}
+	return &Stream[T]{&sd}
 }
 
 func (s *Stream[T]) mapInt(f func(T) int) *IntStream {
 	nlist := make([]int, 0)
-	s.sd.defaultLoop.forEach(s.sd.data, func(val T) {
-		nlist = append(nlist, f(val))
+	s.ForEach(func(t T) {
+		nlist = append(nlist, f(t))
 	})
-	ns := &IntStream{&NumericStream[int]{&Stream[int]{sd: streamData[int]{nlist, &sequentialLoop[int]{}}}}}
+	ns := &IntStream{&NumericStream[int]{&Stream[int]{&streamCtx[int]{nlist, &sequentialLoop[int]{}}}}}
 	return ns
 }
 
@@ -65,9 +83,9 @@ type StringStream struct {
 
 func (s *StringStream) Join(str string) string {
 	base := ""
-	for _, v := range s.sd.data {
-		base = base + v
-	}
+	s.forEachSeqly(func(str string) {
+		base = base + str
+	})
 	return base
 }
 
@@ -77,9 +95,9 @@ type NumericStream[T ~int | ~float64] struct {
 
 func (s *NumericStream[T]) sum() T {
 	var _sum T
-	for _, v := range s.sd.data {
-		_sum = _sum + v
-	}
+	s.ForEach(func(t T) {
+		_sum = _sum + t
+	})
 	return _sum
 }
 
