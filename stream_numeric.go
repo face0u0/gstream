@@ -7,7 +7,7 @@ type NumericStream[T Numeric] struct {
 }
 
 func NewNumericStream[T Numeric](list []T) *NumericStream[T] {
-	return newNumericStreamWithCtx(&sCtx[T]{list, new(Seqential[T])})
+	return newNumericStreamWithCtx(&sCtx[T]{list, ST_SEQUENTIAL})
 }
 
 func newNumericStreamWithCtx[T Numeric](ctx *sCtx[T]) *NumericStream[T] {
@@ -21,8 +21,49 @@ func (s *NumericStream[T]) Filter(f func(T) bool) *NumericStream[T] {
 
 func (s *NumericStream[T]) Sum() T {
 	var _sum T
-	s.ForEach(func(t T) {
-		_sum = _sum + t
+	s.forEachSequential(func(val T) (brk bool) {
+		_sum = _sum + val
+		return
 	})
 	return _sum
+}
+
+func (s *NumericStream[T]) Max() T {
+	updated := false
+	var max T
+	s.forEachSequential(func(val T) (brk bool) {
+		if !updated {
+			max = val
+			updated = true
+			return
+		}
+		if max < val {
+			max = val
+		}
+		return
+	})
+	if !updated {
+		panic("0 len stream not define max")
+	}
+	return max
+}
+
+func (s *NumericStream[T]) Min() T {
+	updated := false
+	var min T
+	s.forEachSequential(func(val T) (brk bool) {
+		if !updated {
+			min = val
+			updated = true
+			return
+		}
+		if min > val {
+			min = val
+		}
+		return
+	})
+	if !updated {
+		panic("0 len stream not define max")
+	}
+	return min
 }

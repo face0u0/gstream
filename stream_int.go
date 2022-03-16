@@ -5,7 +5,7 @@ type IntStream struct {
 }
 
 func NewIntStreamNumeric(list []int) *IntStream {
-	return newIntStreamWithCtx(&sCtx[int]{list, new(Seqential[int])})
+	return newIntStreamWithCtx(&sCtx[int]{list, ST_SEQUENTIAL})
 }
 
 func newIntStreamWithCtx(ctx *sCtx[int]) *IntStream {

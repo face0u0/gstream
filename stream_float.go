@@ -5,7 +5,7 @@ type FloatStream struct {
 }
 
 func NewFloatStreamNumeric(list []float64) *FloatStream {
-	return newFloatStreamWithCtx(&sCtx[float64]{list, new(Seqential[float64])})
+	return newFloatStreamWithCtx(&sCtx[float64]{list, ST_SEQUENTIAL})
 }
 
 func newFloatStreamWithCtx(ctx *sCtx[float64]) *FloatStream {

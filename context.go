@@ -1,20 +1,42 @@
 package gstream
 
+const (
+	ST_SEQUENTIAL = iota
+	ST_PARALLEL   = iota
+)
+
 type sCtx[T any] struct {
-	data        []T
-	defaultLoop LoopStrat[T]
+	values []T
+	loop   int
 }
 
-func newSCtxWithoutData[K, T any](src *sCtx[K], data []T) *sCtx[T] {
-	return &sCtx[T]{data: data, defaultLoop: newLoopStratSameAs[K, T](src.defaultLoop)}
+func newSCtxFrom[T, K any](src *sCtx[T], values []K) *sCtx[K] {
+	return &sCtx[K]{values: values, loop: ST_SEQUENTIAL}
 }
 
-func (s *sCtx[T]) setData(data []T) *sCtx[T] {
-	s.data = data
-	return s
+func (c *sCtx[T]) forEachSequential(f func(val T) (brk bool)) {
+	for _, v := range c.values {
+		if f(v) {
+			break
+		}
+	}
 }
 
-// func (s *sCtx[T]) setLoop(loop LoopStrat[T]) *sCtx[T] {
-// 	s.defaultLoop = loop
-// 	return s
-// }
+func (c *sCtx[T]) forEachParallel(f func(val T) (brk bool)) {
+	for _, v := range c.values {
+		if f(v) {
+			break
+		}
+	}
+}
+
+func (c *sCtx[T]) forEachDefault(f func(val T) (brk bool)) {
+	switch c.loop {
+	case ST_SEQUENTIAL:
+		c.forEachSequential(f)
+	case ST_PARALLEL:
+		c.forEachParallel(f)
+	default:
+		c.forEachSequential(f)
+	}
+}

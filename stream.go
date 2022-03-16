@@ -5,53 +5,61 @@ type Stream[T any] struct {
 }
 
 func NewStream[T any](list []T) *Stream[T] {
-	return newStreamWithCtx(&sCtx[T]{list, new(Seqential[T])})
+	return newStreamWithCtx(&sCtx[T]{list, ST_SEQUENTIAL})
 }
 
 func newStreamWithCtx[T any](ctx *sCtx[T]) *Stream[T] {
-	return &Stream[T]{ctx}
+	return &Stream[T]{sCtx: ctx}
 }
 
-func (s *Stream[T]) ForEach(f func(T)) {
-	s.defaultLoop.forEach(s.data, func(val T) {
-		f(val)
-	})
+func (s *Stream[T]) Parallel() *Stream[T] {
+	s.loop = ST_PARALLEL
+	return s
 }
 
-func (s *Stream[T]) forEachSeqly(f func(T)) {
-	new(Seqential[T]).forEach(s.data, func(val T) {
-		f(val)
-	})
+func (s *Stream[T]) Sequential() *Stream[T] {
+	s.loop = ST_SEQUENTIAL
+	return s
 }
 
 func (s *Stream[T]) Filter(f func(T) bool) *Stream[T] {
 	nl := make([]T, 0)
-	s.forEachSeqly(func(t T) {
-		if f(t) {
-			nl = append(nl, t)
+	s.forEachSequential(func(val T) (brk bool) {
+		if f(val) {
+			nl = append(nl, val)
 		}
+		return
 	})
-	return &Stream[T]{newSCtxWithoutData(s.sCtx, nl)}
+	return &Stream[T]{sCtx: newSCtxFrom(s.sCtx, nl)}
 }
 
-func (s *Stream[T]) MapInt(f func(T) int) *IntStream {
-	nlist := make([]int, 0)
-	s.ForEach(func(t T) {
-		nlist = append(nlist, f(t))
+func (s *Stream[T]) MapToInt(f func(T) int) *IntStream {
+	nl := make([]int, 0)
+	s.forEachSequential(func(val T) (brk bool) {
+		nl = append(nl, f(val))
+		return
 	})
-	return newIntStreamWithCtx(newSCtxWithoutData(s.sCtx, nlist))
+	return newIntStreamWithCtx(newSCtxFrom(s.sCtx, nl))
 }
 
-func (s *Stream[T]) MapStr(f func(T) string) *StringStream {
-	nlist := make([]string, 0)
-	s.ForEach(func(t T) {
-		nlist = append(nlist, f(t))
+func (s *Stream[T]) MapToStr(f func(T) string) *StringStream {
+	nl := make([]string, 0)
+	s.forEachSequential(func(val T) (brk bool) {
+		nl = append(nl, f(val))
+		return
 	})
-	return newStringStreamWithCtx(newSCtxWithoutData(s.sCtx, nlist))
+	return newStringStreamWithCtx(newSCtxFrom(s.sCtx, nl))
+}
+
+func (s *Stream[T]) ForEach(f func(T)) {
+	s.forEachDefault(func(val T) (brk bool) {
+		f(val)
+		return
+	})
 }
 
 func (s *Stream[T]) Count() int {
-	return len(s.data)
+	return len(s.values)
 }
 
 func (s *Stream[T]) AnyMatch(func(T) bool) {

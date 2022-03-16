@@ -5,7 +5,7 @@ type StringStream struct {
 }
 
 func NewStringStreamNumeric(list []string) *StringStream {
-	return newStringStreamWithCtx(&sCtx[string]{list, new(Seqential[string])})
+	return newStringStreamWithCtx(&sCtx[string]{list, ST_SEQUENTIAL})
 }
 
 func newStringStreamWithCtx(ctx *sCtx[string]) *StringStream {
@@ -19,8 +19,9 @@ func (s *StringStream) Filter(f func(string) bool) *StringStream {
 
 func (s *StringStream) Join(str string) string {
 	base := ""
-	s.forEachSeqly(func(str string) {
+	s.forEachSequential(func(val string) (brk bool) {
 		base = base + str
+		return
 	})
 	return base
 }
