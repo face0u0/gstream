@@ -22,6 +22,14 @@ func (s *Stream[T]) Sequential() *Stream[T] {
 	return s
 }
 
+func (s *Stream[T]) Skip(n int) *Stream[T] {
+	return &Stream[T]{sCtx: newSCtxFrom(s.sCtx, s.values[n:])}
+}
+
+func (s *Stream[T]) Limit(max int) *Stream[T] {
+	return &Stream[T]{sCtx: newSCtxFrom(s.sCtx, s.values[:max])}
+}
+
 func (s *Stream[T]) Filter(f func(T) bool) *Stream[T] {
 	nl := make([]T, 0)
 	s.forEachSequential(func(val T) (brk bool) {

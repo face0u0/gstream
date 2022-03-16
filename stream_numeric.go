@@ -14,9 +14,24 @@ func newNumericStreamWithCtx[T Numeric](ctx *sCtx[T]) *NumericStream[T] {
 	return &NumericStream[T]{newStreamWithCtx(ctx)}
 }
 
+func (s *NumericStream[T]) Parallel() *NumericStream[T] {
+	return &NumericStream[T]{s.Stream.Parallel()}
+}
+
+func (s *NumericStream[T]) Sequential() *NumericStream[T] {
+	return &NumericStream[T]{s.Stream.Sequential()}
+}
+
+func (s *NumericStream[T]) Skip(n int) *NumericStream[T] {
+	return &NumericStream[T]{s.Stream.Skip(n)}
+}
+
+func (s *NumericStream[T]) Limit(max int) *NumericStream[T] {
+	return &NumericStream[T]{s.Stream.Limit(max)}
+}
+
 func (s *NumericStream[T]) Filter(f func(T) bool) *NumericStream[T] {
-	base := s.Stream.Filter(f)
-	return &NumericStream[T]{base}
+	return &NumericStream[T]{s.Stream.Filter(f)}
 }
 
 func (s *NumericStream[T]) Sum() T {
