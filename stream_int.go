@@ -4,7 +4,7 @@ type IntStream struct {
 	*NumericStream[int]
 }
 
-func NewIntStreamNumeric(list []int) *IntStream {
+func NewIntStream(list []int) *IntStream {
 	return newIntStreamWithCtx(&sCtx[int]{list, ST_SEQUENTIAL})
 }
 
