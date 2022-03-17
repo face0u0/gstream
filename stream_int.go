@@ -29,6 +29,5 @@ func (s *IntStream) Limit(max int) *IntStream {
 }
 
 func (s *IntStream) Filter(f func(int) bool) *IntStream {
-	base := s.NumericStream.Filter(f)
-	return &IntStream{base}
+	return &IntStream{s.NumericStream.Filter(f)}
 }

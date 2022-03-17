@@ -8,6 +8,19 @@ func NewStream[T any](list []T) *Stream[T] {
 	return newStreamWithCtx(&sCtx[T]{list, ST_SEQUENTIAL})
 }
 
+func Pass[T any](value T) T {
+	return value
+}
+
+func Map[T, K any](src *Stream[T], f func(T) K) *Stream[K] {
+	nl := make([]K, 0)
+	src.forEachSequential(func(val T) (brk bool) {
+		nl = append(nl, f(val))
+		return
+	})
+	return newStreamWithCtx(newSCtxFrom(src.sCtx, nl))
+}
+
 func newStreamWithCtx[T any](ctx *sCtx[T]) *Stream[T] {
 	return &Stream[T]{sCtx: ctx}
 }
@@ -50,6 +63,15 @@ func (s *Stream[T]) MapToInt(f func(T) int) *IntStream {
 	return newIntStreamWithCtx(newSCtxFrom(s.sCtx, nl))
 }
 
+func (s *Stream[T]) MapToFloat(f func(T) float64) *FloatStream {
+	nl := make([]float64, 0)
+	s.forEachSequential(func(val T) (brk bool) {
+		nl = append(nl, f(val))
+		return
+	})
+	return newFloatStreamWithCtx(newSCtxFrom(s.sCtx, nl))
+}
+
 func (s *Stream[T]) MapToStr(f func(T) string) *StringStream {
 	nl := make([]string, 0)
 	s.forEachSequential(func(val T) (brk bool) {
@@ -57,6 +79,15 @@ func (s *Stream[T]) MapToStr(f func(T) string) *StringStream {
 		return
 	})
 	return newStringStreamWithCtx(newSCtxFrom(s.sCtx, nl))
+}
+
+func (s *Stream[T]) Map(f func(T) any) *Stream[any] {
+	nl := make([]any, 0)
+	s.forEachSequential(func(val T) (brk bool) {
+		nl = append(nl, f(val))
+		return
+	})
+	return newStreamWithCtx(newSCtxFrom(s.sCtx, nl))
 }
 
 func (s *Stream[T]) ForEach(f func(T)) {
@@ -70,6 +101,6 @@ func (s *Stream[T]) Count() int {
 	return len(s.values)
 }
 
-func (s *Stream[T]) AnyMatch(func(T) bool) {
-
+func (s *Stream[T]) ToSlice() []T {
+	return s.values
 }

@@ -1,10 +1,12 @@
 package gstream
 
+import "strings"
+
 type StringStream struct {
 	*Stream[string]
 }
 
-func NewStringStreamNumeric(list []string) *StringStream {
+func NewStringStream(list []string) *StringStream {
 	return newStringStreamWithCtx(&sCtx[string]{list, ST_SEQUENTIAL})
 }
 
@@ -29,15 +31,9 @@ func (s *StringStream) Limit(max int) *StringStream {
 }
 
 func (s *StringStream) Filter(f func(string) bool) *StringStream {
-	base := s.Stream.Filter(f)
-	return &StringStream{base}
+	return &StringStream{s.Stream.Filter(f)}
 }
 
 func (s *StringStream) Join(str string) string {
-	base := ""
-	s.forEachSequential(func(val string) (brk bool) {
-		base = base + str
-		return
-	})
-	return base
+	return strings.Join(s.values, str)
 }
