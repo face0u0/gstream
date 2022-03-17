@@ -3,7 +3,7 @@ package gstream
 type Numeric interface{ ~int | ~float64 }
 
 type NumericStream[T Numeric] struct {
-	*Stream[T]
+	*OrderStream[T]
 }
 
 func NewNumericStream[T Numeric](list []T) *NumericStream[T] {
@@ -11,27 +11,35 @@ func NewNumericStream[T Numeric](list []T) *NumericStream[T] {
 }
 
 func newNumericStreamWithCtx[T Numeric](ctx *sCtx[T]) *NumericStream[T] {
-	return &NumericStream[T]{newStreamWithCtx(ctx)}
+	return &NumericStream[T]{newOrderStreamWithCtx(ctx)}
 }
 
 func (s *NumericStream[T]) Parallel() *NumericStream[T] {
-	return &NumericStream[T]{s.Stream.Parallel()}
+	return &NumericStream[T]{s.OrderStream.Parallel()}
 }
 
 func (s *NumericStream[T]) Sequential() *NumericStream[T] {
-	return &NumericStream[T]{s.Stream.Sequential()}
+	return &NumericStream[T]{s.OrderStream.Sequential()}
 }
 
 func (s *NumericStream[T]) Skip(n int) *NumericStream[T] {
-	return &NumericStream[T]{s.Stream.Skip(n)}
+	return &NumericStream[T]{s.OrderStream.Skip(n)}
 }
 
 func (s *NumericStream[T]) Limit(max int) *NumericStream[T] {
-	return &NumericStream[T]{s.Stream.Limit(max)}
+	return &NumericStream[T]{s.OrderStream.Limit(max)}
 }
 
 func (s *NumericStream[T]) Filter(f func(T) bool) *NumericStream[T] {
-	return &NumericStream[T]{s.Stream.Filter(f)}
+	return &NumericStream[T]{s.OrderStream.Filter(f)}
+}
+
+func (s *NumericStream[T]) Reverse() *NumericStream[T] {
+	return &NumericStream[T]{s.OrderStream.Reverse()}
+}
+
+func (s *NumericStream[T]) Sort() *NumericStream[T] {
+	return &NumericStream[T]{s.OrderStream.Sort()}
 }
 
 func (s *NumericStream[T]) Sum() T {
@@ -41,44 +49,4 @@ func (s *NumericStream[T]) Sum() T {
 		return
 	})
 	return _sum
-}
-
-func (s *NumericStream[T]) Max() T {
-	updated := false
-	var max T
-	s.forEachSequential(func(val T) (brk bool) {
-		if !updated {
-			max = val
-			updated = true
-			return
-		}
-		if max < val {
-			max = val
-		}
-		return
-	})
-	if !updated {
-		panic("0 len stream not define max")
-	}
-	return max
-}
-
-func (s *NumericStream[T]) Min() T {
-	updated := false
-	var min T
-	s.forEachSequential(func(val T) (brk bool) {
-		if !updated {
-			min = val
-			updated = true
-			return
-		}
-		if min > val {
-			min = val
-		}
-		return
-	})
-	if !updated {
-		panic("0 len stream not define max")
-	}
-	return min
 }

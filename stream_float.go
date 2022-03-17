@@ -31,3 +31,11 @@ func (s *FloatStream) Limit(max int) *FloatStream {
 func (s *FloatStream) Filter(f func(float64) bool) *FloatStream {
 	return &FloatStream{s.NumericStream.Filter(f)}
 }
+
+func (s *FloatStream) Reverse() *FloatStream {
+	return &FloatStream{s.NumericStream.Reverse()}
+}
+
+func (s *FloatStream) Sort() *FloatStream {
+	return &FloatStream{s.NumericStream.Sort()}
+}

@@ -3,7 +3,7 @@ package gstream
 import "strings"
 
 type StringStream struct {
-	*Stream[string]
+	*OrderStream[string]
 }
 
 func NewStringStream(list []string) *StringStream {
@@ -11,27 +11,35 @@ func NewStringStream(list []string) *StringStream {
 }
 
 func newStringStreamWithCtx(ctx *sCtx[string]) *StringStream {
-	return &StringStream{newStreamWithCtx(ctx)}
+	return &StringStream{newOrderStreamWithCtx(ctx)}
 }
 
 func (s *StringStream) Parallel() *StringStream {
-	return &StringStream{s.Stream.Parallel()}
+	return &StringStream{s.OrderStream.Parallel()}
 }
 
 func (s *StringStream) Sequential() *StringStream {
-	return &StringStream{s.Stream.Sequential()}
+	return &StringStream{s.OrderStream.Sequential()}
 }
 
 func (s *StringStream) Skip(n int) *StringStream {
-	return &StringStream{s.Stream.Skip(n)}
+	return &StringStream{s.OrderStream.Skip(n)}
 }
 
 func (s *StringStream) Limit(max int) *StringStream {
-	return &StringStream{s.Stream.Limit(max)}
+	return &StringStream{s.OrderStream.Limit(max)}
 }
 
 func (s *StringStream) Filter(f func(string) bool) *StringStream {
-	return &StringStream{s.Stream.Filter(f)}
+	return &StringStream{s.OrderStream.Filter(f)}
+}
+
+func (s *StringStream) Reverse() *StringStream {
+	return &StringStream{s.OrderStream.Reverse()}
+}
+
+func (s *StringStream) Sort() *StringStream {
+	return &StringStream{s.OrderStream.Sort()}
 }
 
 func (s *StringStream) Join(str string) string {

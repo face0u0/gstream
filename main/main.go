@@ -11,7 +11,7 @@ import (
 // }
 
 func main() {
-	st := gstream.NewStream([]int{1, 2, 3, 4}).MapToInt(gstream.Pass[int])
+	st := gstream.NewStream([]int{3, 5, 1, 2, 4}).MapToInt(gstream.Pass[int]).Sort()
 	s := gstream.Map(st.Stream, gstream.Pass[int]).Skip(1).ToSlice()
 	s2 := gstream.NewStringStream([]string{"1", "2", "3"}).MapToInt(func(s string) int {
 		i, _ := strconv.Atoi(s)

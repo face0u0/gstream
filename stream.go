@@ -8,6 +8,10 @@ func NewStream[T any](list []T) *Stream[T] {
 	return newStreamWithCtx(&sCtx[T]{list, ST_SEQUENTIAL})
 }
 
+func newStreamWithCtx[T any](ctx *sCtx[T]) *Stream[T] {
+	return &Stream[T]{sCtx: ctx}
+}
+
 func Pass[T any](value T) T {
 	return value
 }
@@ -19,10 +23,6 @@ func Map[T, K any](src *Stream[T], f func(T) K) *Stream[K] {
 		return
 	})
 	return newStreamWithCtx(newSCtxFrom(src.sCtx, nl))
-}
-
-func newStreamWithCtx[T any](ctx *sCtx[T]) *Stream[T] {
-	return &Stream[T]{sCtx: ctx}
 }
 
 func (s *Stream[T]) Parallel() *Stream[T] {
@@ -52,6 +52,16 @@ func (s *Stream[T]) Filter(f func(T) bool) *Stream[T] {
 		return
 	})
 	return &Stream[T]{sCtx: newSCtxFrom(s.sCtx, nl)}
+}
+
+func (s *Stream[T]) Reverse() *Stream[T] {
+	length := len(s.values)
+	nl := make([]T, length)
+	copy(nl, s.values)
+	for i, j := 0, length-1; i < j; i, j = i+1, j-1 {
+		nl[i], nl[j] = nl[j], nl[i]
+	}
+	return &Stream[T]{newSCtxFrom(s.sCtx, nl)}
 }
 
 func (s *Stream[T]) MapToInt(f func(T) int) *IntStream {
