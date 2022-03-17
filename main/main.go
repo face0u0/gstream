@@ -20,7 +20,7 @@ func Range(length int) []int {
 
 func main() {
 	st := gstream.NewStream([]int{3, 5, 1, 2, 4}).MapToInt(gstream.Pass[int]).Sort()
-	s := gstream.Map(st.Stream, gstream.Pass[int]).Skip(1).ToSlice()
+	s, _ := gstream.Map(st.Stream, gstream.Pass[int]).Skip(1).ToSlice()
 	s2 := gstream.NewStringStream([]string{"1", "2", "3"}).MapToInt(func(s string) int {
 		i, _ := strconv.Atoi(s)
 		return i
@@ -28,6 +28,9 @@ func main() {
 	// s .Join(",")
 	fmt.Println(s)
 	fmt.Println(s2)
+	gstream.NewIntStream(Range(100)).ErrorFilter(func(i int) error {
+		return nil
+	})
 	gstream.NewIntStream(Range(100)).Parallel().ForEach(func(i int) {
 		fmt.Println(i)
 	})

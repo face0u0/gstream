@@ -5,7 +5,7 @@ type IntStream struct {
 }
 
 func NewIntStream(list []int) *IntStream {
-	return newIntStreamWithCtx(&sCtx[int]{list, ST_SEQUENTIAL})
+	return newIntStreamWithCtx(&sCtx[int]{values: list, loop: ST_SEQUENTIAL})
 }
 
 func newIntStreamWithCtx(ctx *sCtx[int]) *IntStream {
@@ -30,6 +30,10 @@ func (s *IntStream) Limit(max int) *IntStream {
 
 func (s *IntStream) Filter(f func(int) bool) *IntStream {
 	return &IntStream{s.NumericStream.Filter(f)}
+}
+
+func (s *IntStream) ErrorFilter(f func(int) error) *IntStream {
+	return &IntStream{s.NumericStream.ErrorFilter(f)}
 }
 
 func (s *IntStream) Reverse() *IntStream {

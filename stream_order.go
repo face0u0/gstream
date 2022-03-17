@@ -9,7 +9,7 @@ type OrderStream[T Order] struct {
 }
 
 func NewOrderStream[T Order](list []T) *OrderStream[T] {
-	return newOrderStreamWithCtx(&sCtx[T]{list, ST_SEQUENTIAL})
+	return newOrderStreamWithCtx(&sCtx[T]{values: list, loop: ST_SEQUENTIAL})
 }
 
 func newOrderStreamWithCtx[T Order](ctx *sCtx[T]) *OrderStream[T] {
@@ -34,6 +34,10 @@ func (s *OrderStream[T]) Limit(max int) *OrderStream[T] {
 
 func (s *OrderStream[T]) Filter(f func(T) bool) *OrderStream[T] {
 	return &OrderStream[T]{s.Stream.Filter(f)}
+}
+
+func (s *OrderStream[T]) ErrorFilter(f func(T) error) *OrderStream[T] {
+	return &OrderStream[T]{s.Stream.ErrorFilter(f)}
 }
 
 func (s *OrderStream[T]) Reverse() *OrderStream[T] {

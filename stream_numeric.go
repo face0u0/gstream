@@ -7,7 +7,7 @@ type NumericStream[T Numeric] struct {
 }
 
 func NewNumericStream[T Numeric](list []T) *NumericStream[T] {
-	return newNumericStreamWithCtx(&sCtx[T]{list, ST_SEQUENTIAL})
+	return newNumericStreamWithCtx(&sCtx[T]{values: list, loop: ST_SEQUENTIAL})
 }
 
 func newNumericStreamWithCtx[T Numeric](ctx *sCtx[T]) *NumericStream[T] {
@@ -32,6 +32,10 @@ func (s *NumericStream[T]) Limit(max int) *NumericStream[T] {
 
 func (s *NumericStream[T]) Filter(f func(T) bool) *NumericStream[T] {
 	return &NumericStream[T]{s.OrderStream.Filter(f)}
+}
+
+func (s *NumericStream[T]) ErrorFilter(f func(T) error) *NumericStream[T] {
+	return &NumericStream[T]{s.OrderStream.ErrorFilter(f)}
 }
 
 func (s *NumericStream[T]) Reverse() *NumericStream[T] {

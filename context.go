@@ -14,11 +14,13 @@ const (
 
 type sCtx[T any] struct {
 	values []T
+	errors []error
 	loop   int
+	once   sync.Once
 }
 
 func newSCtxFrom[T, K any](src *sCtx[T], values []K) *sCtx[K] {
-	return &sCtx[K]{values: values, loop: ST_SEQUENTIAL}
+	return &sCtx[K]{values: values, loop: ST_SEQUENTIAL, errors: src.errors}
 }
 
 func (c *sCtx[T]) forEachSequential(f func(val T) (brk bool)) {

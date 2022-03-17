@@ -7,7 +7,7 @@ type StringStream struct {
 }
 
 func NewStringStream(list []string) *StringStream {
-	return newStringStreamWithCtx(&sCtx[string]{list, ST_SEQUENTIAL})
+	return newStringStreamWithCtx(&sCtx[string]{values: list, loop: ST_SEQUENTIAL})
 }
 
 func newStringStreamWithCtx(ctx *sCtx[string]) *StringStream {
@@ -32,6 +32,10 @@ func (s *StringStream) Limit(max int) *StringStream {
 
 func (s *StringStream) Filter(f func(string) bool) *StringStream {
 	return &StringStream{s.OrderStream.Filter(f)}
+}
+
+func (s *StringStream) ErrorFilter(f func(string) error) *StringStream {
+	return &StringStream{s.OrderStream.ErrorFilter(f)}
 }
 
 func (s *StringStream) Reverse() *StringStream {

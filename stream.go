@@ -5,7 +5,7 @@ type Stream[T any] struct {
 }
 
 func NewStream[T any](list []T) *Stream[T] {
-	return newStreamWithCtx(&sCtx[T]{list, ST_SEQUENTIAL})
+	return newStreamWithCtx(&sCtx[T]{values: list, loop: ST_SEQUENTIAL})
 }
 
 func newStreamWithCtx[T any](ctx *sCtx[T]) *Stream[T] {
@@ -48,6 +48,20 @@ func (s *Stream[T]) Filter(f func(T) bool) *Stream[T] {
 	s.forEachSequential(func(val T) (brk bool) {
 		if f(val) {
 			nl = append(nl, val)
+		}
+		return
+	})
+	return &Stream[T]{sCtx: newSCtxFrom(s.sCtx, nl)}
+}
+
+func (s *Stream[T]) ErrorFilter(f func(T) error) *Stream[T] {
+	nl := make([]T, 0)
+	s.forEachSequential(func(val T) (brk bool) {
+		err := f(val)
+		if err != nil {
+			nl = append(nl, val)
+		} else {
+			s.errors = append(s.errors, err)
 		}
 		return
 	})
@@ -111,6 +125,6 @@ func (s *Stream[T]) Count() int {
 	return len(s.values)
 }
 
-func (s *Stream[T]) ToSlice() []T {
-	return s.values
+func (s *Stream[T]) ToSlice() ([]T, []error) {
+	return s.values, s.errors
 }
