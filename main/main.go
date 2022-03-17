@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"gstream"
 	"strconv"
+
+	"github.com/face0u0/gstream"
 )
 
 // func Cast[T any](value T) T {
